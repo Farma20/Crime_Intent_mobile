@@ -44,7 +44,6 @@ class CrimeFragment: Fragment() {
 
             }
         }
-
         //Добавление созданного слушателя на titleField
         titleField.addTextChangedListener(titleWatcher)
 
