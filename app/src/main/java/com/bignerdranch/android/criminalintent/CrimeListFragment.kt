@@ -4,7 +4,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
+import android.widget.Adapter
+import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +19,7 @@ private const val TAG = "CrimeListFragment"
 class CrimeListFragment: Fragment() {
 
     private lateinit var crimeRecyclerView: RecyclerView
+    private var adapter: CrimeAdapter? = null
 
     //Подключаем ViewModel
     private val crimeListViewModel: CrimeListViewModel by lazy {
@@ -38,8 +43,67 @@ class CrimeListFragment: Fragment() {
 
         crimeRecyclerView.layoutManager = LinearLayoutManager(context)
 
+        updateUI()
+
         return view
     }
+
+    //Функция, которая связывает адаптер с данными и с утилизатором
+    private fun updateUI(){
+        val crimes: List<Crime> = crimeListViewModel.crimes
+        adapter = CrimeAdapter(crimes)
+        crimeRecyclerView.adapter = adapter
+    }
+
+    //Создание CrimeHolder, который будет отрисовывать в RecyclerView отдельные item из
+    //list_item_crime.xml
+    //inner class - вложенный класс, который имеет доступ до элементов внешнего класса
+    private inner class CrimeHolder(view: View):RecyclerView.ViewHolder(view),
+    View.OnClickListener{
+        lateinit var crime: Crime
+
+        private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
+        private val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
+
+        //Назначаем слушателя нажатий на весь CrimeHolder
+        init {
+            itemView.setOnClickListener(this)
+        }
+
+        fun bind(crime: Crime){
+            this.crime = crime
+            titleTextView.text = this.crime.title
+            dateTextView.text = this.crime.date.toString()
+        }
+
+        //РЕализация функции oneClick интерфейса View.OnClickListener
+        override fun onClick(p0: View?) {
+            Toast.makeText(context, "${crime.title} pressed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    //Адаптер для создания и работы над CrimeHolder
+    private inner class CrimeAdapter(var crimes: List<Crime>):RecyclerView.Adapter<CrimeHolder>(){
+
+        //Функция, создающая CrimeHolder и связывающая его с представлением item
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
+            val view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
+            return CrimeHolder(view)
+        }
+
+        //Заполнение холдера данными из модели
+        override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
+            val crime = crimes[position]
+
+            holder.bind(crime)
+        }
+
+        // Возвращает кол-во items
+        override fun getItemCount() = crimes.size
+
+    }
+
 
     //Функция, возвращающая экземпляр класа при вызове из mainActivity
     companion object{
