@@ -58,7 +58,7 @@ class CrimeListFragment: Fragment() {
     //Создание CrimeHolder, который будет отрисовывать в RecyclerView отдельные item из
     //list_item_crime.xml
     //inner class - вложенный класс, который имеет доступ до элементов внешнего класса
-    private inner class CrimeHolder(view: View):RecyclerView.ViewHolder(view),
+    private inner class SimpleCrimeHolder(view: View):RecyclerView.ViewHolder(view),
     View.OnClickListener{
         lateinit var crime: Crime
 
@@ -82,21 +82,66 @@ class CrimeListFragment: Fragment() {
         }
     }
 
+    //Холдер для серьезных преступлений
+    private inner class SeriousCrimeHolder(view: View):RecyclerView.ViewHolder(view),
+        View.OnClickListener{
+        lateinit var crime: Crime
+
+        private val titleTextView: TextView = itemView.findViewById(R.id.serious_crime_title)
+        private val dateTextView: TextView = itemView.findViewById(R.id.serious_crime_date)
+
+        //Назначаем слушателя нажатий на весь CrimeHolder
+        init {
+            itemView.setOnClickListener(this)
+        }
+
+        fun bind(crime: Crime){
+            this.crime = crime
+            titleTextView.text = this.crime.title
+            dateTextView.text = this.crime.date.toString()
+        }
+
+        //РЕализация функции oneClick интерфейса View.OnClickListener
+        override fun onClick(p0: View?) {
+            Toast.makeText(context, "${crime.title} pressed", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     //Адаптер для создания и работы над CrimeHolder
-    private inner class CrimeAdapter(var crimes: List<Crime>):RecyclerView.Adapter<CrimeHolder>(){
+    private inner class CrimeAdapter(var crimes: List<Crime>):RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
         //Функция, создающая CrimeHolder и связывающая его с представлением item
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
-            val view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
-            return CrimeHolder(view)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+            println("Тип view - $viewType")
+            val view = layoutInflater.inflate(viewType, parent, false)
+
+            return when(viewType){
+                R.layout.list_item_crime -> SimpleCrimeHolder(view)
+
+                else -> SeriousCrimeHolder(view)
+            }
+
+
         }
 
         //Заполнение холдера данными из модели
-        override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
+        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             val crime = crimes[position]
 
-            holder.bind(crime)
+            when(holder){
+                is SimpleCrimeHolder -> holder.bind(crime)
+                is SeriousCrimeHolder -> holder.bind(crime)
+            }
+
+        }
+
+        override fun getItemViewType(position: Int): Int {
+            return when(crimeListViewModel.crimes[position].requiredPolice){
+                0 -> R.layout.list_item_crime
+
+                else -> R.layout.list_item_serious_crime
+            }
         }
 
         // Возвращает кол-во items
