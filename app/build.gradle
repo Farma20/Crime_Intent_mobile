@@ -3,6 +3,9 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
 android {
     namespace 'com.bignerdranch.android.criminalintent'
     compileSdk 32
@@ -38,5 +41,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.room:roomruntime:2.1.0-alpha04'
+    implementation 'androidx.room:room-common:2.4.3'
+    implementation 'androidx.room:room-ktx:2.4.3'
+    kapt 'androidx.room:room-compiler:2.5.0-beta02'
     testImplementation 'junit:junit:4.13.2'
 }
