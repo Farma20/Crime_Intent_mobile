@@ -1,12 +1,10 @@
 package com.bignerdranch.android.criminalintent
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.util.Date
 import java.util.UUID
 import kotlin.random.Random
-
-//Подключение сгенерированных аннотаций библиотеки room
-annotation class PrimaryKey
-annotation class Entity
 
 //Обновлем класс модели до сущности базы данных
 @Entity
