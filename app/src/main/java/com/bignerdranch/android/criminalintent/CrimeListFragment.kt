@@ -1,12 +1,11 @@
 package com.bignerdranch.android.criminalintent
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
-import android.widget.Adapter
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -16,13 +15,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.text.DateFormat
+import java.util.UUID
 
 private const val TAG = "CrimeListFragment"
 
 class CrimeListFragment: Fragment() {
 
+    //callback интерфейс
+    interface Callbacks{
+        fun onCrimeSelected(crimeId: UUID)
+    }
+
     private lateinit var crimeRecyclerView: RecyclerView
     private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
+
+    //Свойство, позволяющее удерживать объект, реализующий интерфейс Callbacks
+    private var callbacks: Callbacks? = null
 
 
     //Подключаем ViewModel
@@ -95,7 +103,7 @@ class CrimeListFragment: Fragment() {
 
         //РЕализация функции oneClick интерфейса View.OnClickListener
         override fun onClick(p0: View?) {
-            Toast.makeText(context, "${crime.title} pressed", Toast.LENGTH_SHORT).show()
+            callbacks?.onCrimeSelected(crime.id)
         }
     }
 
@@ -164,6 +172,20 @@ class CrimeListFragment: Fragment() {
         // Возвращает кол-во items
         override fun getItemCount() = crimes.size
 
+    }
+
+
+    //Функции для установки и отмены свойства callbacks
+    //Вызывается при вызове fragment через mainActivity
+    //context в данном случае - вызывающая activity
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callbacks = context as Callbacks?
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        callbacks = null
     }
 
 
