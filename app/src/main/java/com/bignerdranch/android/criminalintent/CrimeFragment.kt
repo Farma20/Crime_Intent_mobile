@@ -12,6 +12,9 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import java.util.UUID
 
 private const val TAG = "CrimeFragment"
@@ -25,12 +28,40 @@ class CrimeFragment: Fragment() {
     private lateinit var dateButton: Button
     private lateinit var solvedCheckBox: CheckBox
 
+    //Ленивая инициализация ViewModel
+    private val crimeDetailViewModel: CrimeDetailViewModel by lazy{
+        ViewModelProvider(this)[CrimeDetailViewModel::class.java]
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         crime = Crime()
 
         val crimeId: UUID = arguments?.getSerializable(ARG_CRIME_ID) as UUID
         Log.d(TAG, "Args bundle crime id is $crimeId")
+        crimeDetailViewModel.loadCrime(crimeId)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        crimeDetailViewModel.crimeLiveData.observe(
+            viewLifecycleOwner,
+            Observer { crime->
+                crime?.let {
+                    this.crime = crime
+                    updateUI()
+                }
+            }
+        )
+    }
+
+    private fun updateUI(){
+        titleField.setText(crime.title)
+        dateButton.text = crime.date.toString()
+        solvedCheckBox.apply {
+            isChecked = crime.isSolved
+            jumpDrawablesToCurrentState()
+        }
     }
 
     //Реализация контроллера происходит в onStart
