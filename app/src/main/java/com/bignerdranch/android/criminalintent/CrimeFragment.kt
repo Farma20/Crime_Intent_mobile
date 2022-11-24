@@ -19,6 +19,7 @@ import java.util.UUID
 
 private const val TAG = "CrimeFragment"
 private const val ARG_CRIME_ID = "crime_id"
+private const val DIALOG_DATE = "dialog_date"
 
 //Создание UI-фрагмента (контроллера)
 class CrimeFragment: Fragment() {
@@ -92,6 +93,13 @@ class CrimeFragment: Fragment() {
             }
         }
 
+        //Добавление слушателя на кнопку date
+        dateButton.setOnClickListener{
+            DatePickerFragment.newInstance(crime.date).apply {
+                show(this@CrimeFragment.requireFragmentManager(), DIALOG_DATE)
+            }
+        }
+
     }
 
     //переопределение функции отправки представления в host-activity
@@ -108,10 +116,10 @@ class CrimeFragment: Fragment() {
         solvedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
 
         //Настройка виджета кнопки через apply
-        dateButton.apply {
-            text = crime.date.toString()
-            isEnabled = false
-        }
+//        dateButton.apply {
+//            text = crime.date.toString()
+//            isEnabled = false
+//        }
 
         return view
     }
