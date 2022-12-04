@@ -4,16 +4,34 @@ import android.app.DatePickerDialog
 import android.app.Dialog
 import java.util.Calendar
 import android.os.Bundle
+import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
 import java.util.Date
+import java.util.GregorianCalendar
 
 private const val ARG_DATE = "date"
 
 //Создание фрагмента диалогового окна с календарем
 class DatePickerFragment: DialogFragment() {
 
+    //интерфейс обратного вызова для передачи выбранной даты обратно в CrimeFragment
+    interface Callbacks{
+        fun onDateSelected(date: Date)
+    }
+
     //Данная функция вызывается в момент транзакции данного фрагмента в mainActivity
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+
+        //Создание слушателя, отправляющего выбранную дату обратно в целевой фрагмент
+        val dateListener = DatePickerDialog.OnDateSetListener{
+            _:DatePicker, year: Int, month: Int, day:Int ->
+
+            val resultDate: Date = GregorianCalendar(year, month, day).time
+
+            targetFragment?.let{fragment ->
+                (fragment as Callbacks).onDateSelected(resultDate)
+            }
+        }
 
         val date = arguments?.getSerializable(ARG_DATE) as Date
 
@@ -29,7 +47,7 @@ class DatePickerFragment: DialogFragment() {
 
         return DatePickerDialog(
             requireContext(),
-            null,
+            dateListener,
             initialYear,
             initialMonth,
             initialDay

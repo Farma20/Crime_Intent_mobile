@@ -15,19 +15,28 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
-import java.util.UUID
+import java.util.*
 
 private const val TAG = "CrimeFragment"
 private const val ARG_CRIME_ID = "crime_id"
 private const val DIALOG_DATE = "dialog_date"
+private const val REQUEST_DATE = 0
+private const val DIALOG_TIME = "dialog_time"
 
 //Создание UI-фрагмента (контроллера)
-class CrimeFragment: Fragment() {
+class CrimeFragment: Fragment(), DatePickerFragment.Callbacks {
 
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
+    private lateinit var timeButton: Button
     private lateinit var solvedCheckBox: CheckBox
+
+    //определение интерфейса обратного вызова DatePickerFragment для передачи данных между Fragments
+    override fun onDateSelected(date: Date) {
+        crime.date = date
+        updateUI()
+    }
 
     //Ленивая инициализация ViewModel
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy{
@@ -96,10 +105,20 @@ class CrimeFragment: Fragment() {
         //Добавление слушателя на кнопку date
         dateButton.setOnClickListener{
             DatePickerFragment.newInstance(crime.date).apply {
+
+                //обявление CrimeFragment целевым фрагментом (для DatePickerFragment)
+                setTargetFragment(this@CrimeFragment, REQUEST_DATE)
+
                 show(this@CrimeFragment.requireFragmentManager(), DIALOG_DATE)
             }
         }
 
+        //добавление слушателя на time
+        timeButton.setOnClickListener{
+            TimePickerFragment.newInstance(crime.date).apply {
+                show(this@CrimeFragment.requireFragmentManager(), DIALOG_TIME)
+            }
+        }
     }
 
     //переопределение функции отправки представления в host-activity
@@ -113,6 +132,7 @@ class CrimeFragment: Fragment() {
         //Инициализация виджетов
         titleField = view.findViewById(R.id.crime_title) as EditText
         dateButton = view.findViewById(R.id.crime_date) as Button
+        timeButton = view.findViewById(R.id.crime_time) as Button
         solvedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
 
         //Настройка виджета кнопки через apply
