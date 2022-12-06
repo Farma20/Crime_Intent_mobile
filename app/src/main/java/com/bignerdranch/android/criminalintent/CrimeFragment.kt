@@ -1,5 +1,6 @@
 package com.bignerdranch.android.criminalintent
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -15,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import java.sql.Time
 import java.util.*
 
 private const val TAG = "CrimeFragment"
@@ -24,7 +26,7 @@ private const val REQUEST_DATE = 0
 private const val DIALOG_TIME = "dialog_time"
 
 //Создание UI-фрагмента (контроллера)
-class CrimeFragment: Fragment(), DatePickerFragment.Callbacks {
+class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragment.Callbacks {
 
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
@@ -34,6 +36,11 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks {
 
     //определение интерфейса обратного вызова DatePickerFragment для передачи данных между Fragments
     override fun onDateSelected(date: Date) {
+        crime.date = date
+        updateUI()
+    }
+
+    override fun onTimeSelected(date: Date) {
         crime.date = date
         updateUI()
     }
@@ -65,9 +72,25 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks {
         )
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateUI(){
+        val calendar = Calendar.getInstance()
+
+        calendar.time = crime.date
+
+        val initialYear = calendar.get(Calendar.YEAR).toString()
+
+        val initialMonth = calendar.get(Calendar.MONTH).toString()
+
+        val initialDay = calendar.get(Calendar.DAY_OF_MONTH).toString()
+
+        val hours = calendar.get(Calendar.HOUR)
+
+        val minutes = calendar.get(Calendar.MINUTE)
+
         titleField.setText(crime.title)
-        dateButton.text = crime.date.toString()
+        dateButton.text = "${initialDay}.${initialMonth}.${initialYear}"
+        timeButton.text = "${hours}:${minutes}"
         solvedCheckBox.apply {
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()

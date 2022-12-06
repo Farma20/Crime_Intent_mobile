@@ -2,15 +2,20 @@ package com.bignerdranch.android.criminalintent
 
 import android.app.Dialog
 import android.app.TimePickerDialog
-import java.util.Calendar
 import android.os.Bundle
 import android.widget.TimePicker
 import androidx.fragment.app.DialogFragment
-import java.util.Date
+import java.util.*
+import kotlin.time.Duration.Companion.hours
 
 private const val ARG_TIME = "time"
 
 class TimePickerFragment: DialogFragment() {
+
+    interface Callbacks{
+        fun onTimeSelected(date: Date)
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         val date = arguments?.getSerializable(ARG_TIME) as Date
@@ -22,6 +27,16 @@ class TimePickerFragment: DialogFragment() {
         val hours = calendar.get(Calendar.HOUR)
 
         val minutes = calendar.get(Calendar.MINUTE)
+
+        val timeListener = TimePickerDialog.OnTimeSetListener{
+                _:TimePicker, hours: Int, minutes: Int->
+
+            val resultDate: Date = date
+
+            targetFragment?.let { fragment ->
+                (fragment as Callbacks).onTimeSelected(resultDate)
+            }
+        }
 
         return TimePickerDialog(
             requireContext(),
