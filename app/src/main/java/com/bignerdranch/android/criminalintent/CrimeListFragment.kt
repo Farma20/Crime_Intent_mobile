@@ -3,9 +3,7 @@ package com.bignerdranch.android.criminalintent
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -67,6 +65,13 @@ class CrimeListFragment: Fragment() {
 
             }
         )
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        //Разрешаем данному фрагменту получение обратных вызовов menu через fragmentManager
+        setHasOptionsMenu(true)
     }
 
     //Функция, которая связывает адаптер с данными и с утилизатором
@@ -171,6 +176,27 @@ class CrimeListFragment: Fragment() {
 
         // Возвращает кол-во items
         override fun getItemCount() = crimes.size
+
+    }
+
+    //Функции обратного вызова для создания меню приложения (в Активити та же функция)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_crime_list, menu)
+    }
+
+    //Функция обратного вызова, реагирующая на нажатие item у menu
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId){
+            R.id.new_crime -> {
+                val crime = Crime()
+                crimeListViewModel.addCrime(crime)
+                callbacks?.onCrimeSelected(crime.id)
+                return true
+            }
+            else-> return super.onOptionsItemSelected(item)
+        }
+
 
     }
 
