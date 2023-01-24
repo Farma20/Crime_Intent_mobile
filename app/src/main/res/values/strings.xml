@@ -6,4 +6,6 @@
     <string name="crime_solved_label">Solved</string>
     <string name="call_to_the_police">CALL TO POLICE</string>
     <string name="new_crime">New Crime</string>
+    <string name="crime_suspect_text">CHOOSE SUSPECT</string>
+    <string name="crime_report_text">SEND CRIME REPORT</string>
 </resources>

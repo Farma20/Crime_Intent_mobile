@@ -11,7 +11,9 @@ import kotlin.random.Random
 data class Crime(@PrimaryKey var id: UUID = UUID.randomUUID(),
                  var title:String = "",
                  var date: Date = Date(),
-                 var isSolved:Boolean = Random.nextBoolean())
+                 var isSolved:Boolean = false,
+                 var suspect: String = ""
+                 )
 //                 var requiredPolice: Int = (0..1).random())
 
 
