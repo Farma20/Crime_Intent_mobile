@@ -1,9 +1,12 @@
 package com.bignerdranch.android.criminalintent
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.icu.text.MessageFormat.format
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.format.DateFormat.format
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +19,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import java.lang.String.format
 import java.sql.Time
+import java.text.DateFormat
+import java.text.MessageFormat.format
 import java.util.*
 
 private const val TAG = "CrimeFragment"
@@ -24,6 +30,7 @@ private const val ARG_CRIME_ID = "crime_id"
 private const val DIALOG_DATE = "dialog_date"
 private const val REQUEST_DATE = 0
 private const val DIALOG_TIME = "dialog_time"
+private const val DATE_FORMAT = "EEE, MMM, dd"
 
 //Создание UI-фрагмента (контроллера)
 class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragment.Callbacks {
@@ -33,6 +40,7 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
     private lateinit var dateButton: Button
     private lateinit var timeButton: Button
     private lateinit var solvedCheckBox: CheckBox
+    private lateinit var reportButton: Button
 
     //определение интерфейса обратного вызова DatePickerFragment для передачи данных между Fragments
     override fun onDateSelected(date: Date) {
@@ -101,6 +109,7 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
     override fun onStart() {
         super.onStart()
 
+
         //добавление анонимного класса-слушателя для title
         val titleWatcher = object: TextWatcher{
             override fun beforeTextChanged(sequence: CharSequence?, start: Int, count: Int, after: Int) {
@@ -142,6 +151,18 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
                 show(this@CrimeFragment.requireFragmentManager(), DIALOG_TIME)
             }
         }
+
+        //Добавление слушателя на reportButton
+        //Вызов неявного интента
+        reportButton.setOnClickListener{
+            Intent(Intent.ACTION_SEND).apply {
+                type="text/plain"
+                putExtra(Intent.EXTRA_TEXT, getCrimeReport())
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject))
+            }.also { intent ->
+                startActivity(intent)
+            }
+        }
     }
 
     //переопределение функции отправки представления в host-activity
@@ -157,6 +178,7 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
         dateButton = view.findViewById(R.id.crime_date) as Button
         timeButton = view.findViewById(R.id.crime_time) as Button
         solvedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
+        reportButton = view.findViewById(R.id.report_button) as Button
 
         //Настройка виджета кнопки через apply
 //        dateButton.apply {
@@ -165,6 +187,25 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
 //        }
 
         return view
+    }
+
+    //Функция возврата данных в текстовом виде
+    private fun getCrimeReport():String{
+        val solvedString = if(crime.isSolved){
+            getString(R.string.crime_report_solved)
+        }else{
+            getString(R.string.crime_report_unsolved)
+        }
+
+        val dateString = android.text.format.DateFormat.format(DATE_FORMAT, crime.date).toString()
+
+        val suspect = if(crime.suspect.isBlank()){
+            getString(R.string.crime_report_no_suspect)
+        }else{
+            getString(R.string.crime_report_suspect, crime.suspect)
+        }
+
+        return getString(R.string.crime_report, crime.title, dateString, solvedString, suspect)
     }
 
     override fun onStop() {
