@@ -3,6 +3,8 @@ package com.bignerdranch.android.criminalintent
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.icu.text.MessageFormat.format
 import android.net.Uri
 import android.os.Bundle
@@ -23,10 +25,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import java.lang.String.format
+import java.security.AccessController.checkPermission
 import java.sql.Time
 import java.text.DateFormat
 import java.text.MessageFormat.format
 import java.util.*
+import java.util.jar.Manifest
 
 private const val TAG = "CrimeFragment"
 private const val ARG_CRIME_ID = "crime_id"
@@ -46,6 +50,7 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
     private lateinit var solvedCheckBox: CheckBox
     private lateinit var reportButton: Button
     private lateinit var suspectButton: Button
+    private lateinit var callButton: Button
 
     //определение интерфейса обратного вызова DatePickerFragment для передачи данных между Fragments
     override fun onDateSelected(date: Date) {
@@ -182,6 +187,17 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
             setOnClickListener {
                 startActivityForResult(pickContactIntent, REQUEST_CONTACT)
             }
+
+            //Проверка на существование необходимого для открытия интента
+//            val packageManager: PackageManager = requireActivity().packageManager
+//            val resolveActivity: ResolveInfo? = packageManager.resolveActivity(
+//                pickContactIntent,
+//                PackageManager.MATCH_DEFAULT_ONLY
+//            )
+//
+//            if (resolveActivity == null)
+//                isEnabled = false
+
         }
     }
 
@@ -200,6 +216,7 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
         solvedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
         reportButton = view.findViewById(R.id.report_button) as Button
         suspectButton = view.findViewById(R.id.suspect_button) as Button
+        callButton = view.findViewById(R.id.call_button) as Button
 
         //Настройка виджета кнопки через apply
 //        dateButton.apply {
@@ -244,6 +261,7 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
                 //Укзать для каких полей ваш запрос должен возвращать знечения
                 val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
 
+                //Достаем курсор, в котором хранится имя
                 if (contactUri != null){
                     val cursor = requireActivity().contentResolver.query(
                         contactUri,

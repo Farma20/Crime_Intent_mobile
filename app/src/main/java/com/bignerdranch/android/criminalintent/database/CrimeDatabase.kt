@@ -10,7 +10,7 @@ import com.bignerdranch.android.criminalintent.Crime
 
 //Соединение базы данных с сущностью, которую мы аннотировали
 //Аннотация @Database определяет, что данный класс является базой данных приложения
-@Database(entities = [Crime::class], version=2)
+@Database(entities = [Crime::class], version=3)
 
 //Добавление созданных нами конвертеров типов
 @TypeConverters(CrimeTypeConverters::class)
@@ -27,4 +27,13 @@ val migration_1_2 =  object: Migration(1, 2){
             "ALTER TABLE Crime ADD COLUMN suspect TEXT NOT NULL DEFAULT ''"
         )
     }
+}
+
+val migration_2_3 = object : Migration(2, 3) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL(
+            "ALTER TABLE Crime ADD COLUMN suspectNumber TEXT NOT NULL DEFAULT ''"
+        )
+    }
+
 }
