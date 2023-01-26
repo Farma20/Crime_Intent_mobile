@@ -1,9 +1,12 @@
 package com.bignerdranch.android.criminalintent
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.icu.text.MessageFormat.format
+import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat.format
@@ -31,6 +34,7 @@ private const val DIALOG_DATE = "dialog_date"
 private const val REQUEST_DATE = 0
 private const val DIALOG_TIME = "dialog_time"
 private const val DATE_FORMAT = "EEE, MMM, dd"
+private const val REQUEST_CONTACT = 1
 
 //Создание UI-фрагмента (контроллера)
 class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragment.Callbacks {
@@ -41,6 +45,7 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
     private lateinit var timeButton: Button
     private lateinit var solvedCheckBox: CheckBox
     private lateinit var reportButton: Button
+    private lateinit var suspectButton: Button
 
     //определение интерфейса обратного вызова DatePickerFragment для передачи данных между Fragments
     override fun onDateSelected(date: Date) {
@@ -103,6 +108,10 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()
         }
+
+        if (crime.suspect.isNotEmpty()){
+            suspectButton.text = crime.suspect
+        }
     }
 
     //Реализация контроллера происходит в onStart
@@ -160,7 +169,18 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
                 putExtra(Intent.EXTRA_TEXT, getCrimeReport())
                 putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject))
             }.also { intent ->
-                startActivity(intent)
+                val chooserIntent = Intent.createChooser(intent, getString(R.string.send_report))
+                startActivity(chooserIntent)
+            }
+        }
+
+        //Добавление слушателя на suspectButton
+        //Вызов неявного интента
+        suspectButton.apply {
+            val pickContactIntent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
+
+            setOnClickListener {
+                startActivityForResult(pickContactIntent, REQUEST_CONTACT)
             }
         }
     }
@@ -179,6 +199,7 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
         timeButton = view.findViewById(R.id.crime_time) as Button
         solvedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
         reportButton = view.findViewById(R.id.report_button) as Button
+        suspectButton = view.findViewById(R.id.suspect_button) as Button
 
         //Настройка виджета кнопки через apply
 //        dateButton.apply {
@@ -206,6 +227,47 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
         }
 
         return getString(R.string.crime_report, crime.title, dateString, solvedString, suspect)
+    }
+
+    //метод отлавливающий результат вызова неявного интента с запросом на возврат данных
+    @SuppressLint("Recycle")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when{
+            resultCode != Activity.RESULT_OK ->
+                return
+
+            data != null && requestCode == REQUEST_CONTACT -> {
+                val contactUri: Uri? = data.data
+
+                //Укзать для каких полей ваш запрос должен возвращать знечения
+                val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
+
+                if (contactUri != null){
+                    val cursor = requireActivity().contentResolver.query(
+                        contactUri,
+                        queryFields,
+                        null,
+                        null,
+                        null
+                    )
+                    cursor?.use {
+                        if (it.count == 0)
+                            return
+
+                        //первый столбец первой строки данных и есть имя подозреваемого
+                        it.moveToFirst()
+                        val suspect = it.getString(0)
+                        crime.suspect = suspect
+                        crimeDetailViewModel.saveCrime(crime)
+                        suspectButton.text = suspect
+                    }
+
+                }
+            }
+        }
+
     }
 
     override fun onStop() {
