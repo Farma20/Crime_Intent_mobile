@@ -19,11 +19,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
+import java.io.File
 import java.lang.String.format
 import java.security.AccessController.checkPermission
 import java.sql.Time
@@ -44,6 +47,8 @@ private const val REQUEST_CONTACT = 1
 class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragment.Callbacks {
 
     private lateinit var crime: Crime
+    private lateinit var photoFile:File
+
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
     private lateinit var timeButton: Button
@@ -51,6 +56,8 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
     private lateinit var reportButton: Button
     private lateinit var suspectButton: Button
     private lateinit var callButton: Button
+    private lateinit var photoButton: ImageButton
+    private lateinit var photoView: ImageView
 
     //определение интерфейса обратного вызова DatePickerFragment для передачи данных между Fragments
     override fun onDateSelected(date: Date) {
@@ -84,6 +91,7 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
             Observer { crime->
                 crime?.let {
                     this.crime = crime
+                    crimeDetailViewModel.getPhotoFile(crime)
                     updateUI()
                 }
             }
@@ -217,6 +225,8 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
         reportButton = view.findViewById(R.id.report_button) as Button
         suspectButton = view.findViewById(R.id.suspect_button) as Button
         callButton = view.findViewById(R.id.call_button) as Button
+        photoButton = view.findViewById(R.id.crime_camera) as ImageButton
+        photoView = view.findViewById(R.id.crime_photo) as ImageView
 
         //Настройка виджета кнопки через apply
 //        dateButton.apply {

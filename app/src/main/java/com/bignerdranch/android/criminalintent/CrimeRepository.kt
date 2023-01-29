@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Room
 import com.bignerdranch.android.criminalintent.database.CrimeDatabase
 import com.bignerdranch.android.criminalintent.database.migration_2_3
+import java.io.File
 import java.util.UUID
 import java.util.concurrent.Executors
 
@@ -25,10 +26,16 @@ class CrimeRepository private constructor(context: Context) {
     //Создание исполнителя
     private val executor = Executors.newSingleThreadExecutor()
 
+    //указание места хранения фотографий
+    private val filesDir = context.applicationContext.filesDir
+
     //функции, которые репозиторий будет вызывать через DAO
     fun getCrimes(): LiveData<List<Crime>> = crimeDao.getCrimes()
 
     fun getCrime(id: UUID): LiveData<Crime> = crimeDao.getCrime(id)
+
+    //Функция взятия фотографии
+    fun getPhotoFile(crime:Crime): File = File(filesDir, crime.photoFileName)
 
     //Оборачиваем функции обновления и вставок в исполнителя,
     //чтобы обработать их в отдельном потоке
