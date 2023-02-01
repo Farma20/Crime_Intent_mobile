@@ -4,6 +4,11 @@
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
+<!--    сообщаем, что приложение использует камеру-->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false"/>
+
     <application
         android:name=".CriminalIntentApplication"
         android:allowBackup="true"

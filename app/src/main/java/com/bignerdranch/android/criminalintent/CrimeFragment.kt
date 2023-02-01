@@ -25,6 +25,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
@@ -42,11 +43,13 @@ private const val TAG = "CrimeFragment"
 private const val ARG_CRIME_ID = "crime_id"
 private const val DIALOG_DATE = "dialog_date"
 private const val DIALOG_TIME = "dialog_time"
+private const val DIALOG_PHOTO = "dialog_photo"
 private const val DATE_FORMAT = "EEE, MMM, dd"
 
 private const val REQUEST_DATE = 0
 private const val REQUEST_CONTACT = 1
 private const val REQUEST_PHOTO = 2
+private const val REQUEST_FULL_SCREEN_PHOTO = 3
 
 //Создание UI-фрагмента (контроллера)
 class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragment.Callbacks {
@@ -249,6 +252,11 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
 
                 startActivityForResult(captureImage, REQUEST_PHOTO)
             }
+        }
+
+        photoView.setOnClickListener{
+            FullScreenPhotoDialogFragment.newInstance(photoFile)
+                .show(this@CrimeFragment.requireFragmentManager(),DIALOG_PHOTO)
         }
     }
 
