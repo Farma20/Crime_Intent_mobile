@@ -5,6 +5,7 @@
     <string name="crime_title_label">Título</string>
     <string name="crime_details_label">Detalles</string>
     <string name="crime_solved_label">Solucionado</string>
+    <string name="call_to_the_police">CALL TO POLICECE</string>
     <string name="new_crime">Crimen Nuevo</string>
     <string name="crime_suspect_text">Elegir Sospechoso</string>
     <string name="crime_report_text">Enviar el Informe del Crimen</string>

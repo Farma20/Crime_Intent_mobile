@@ -322,7 +322,6 @@ class CrimeFragment: Fragment(), DatePickerFragment.Callbacks, TimePickerFragmen
                 //Укзать для каких полей ваш запрос должен возвращать знечения
                 val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
 
-                //Достаем курсор, в котором хранится имя
                 if (contactUri != null){
                     val cursor = requireActivity().contentResolver.query(
                         contactUri,
